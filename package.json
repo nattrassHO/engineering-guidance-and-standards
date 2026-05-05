@@ -26,6 +26,7 @@
   "scripts": {
     "build": "eleventy",
     "serve": "eleventy --serve",
+    "test:unit": "node --test \"tests/unit/**/*.test.js\"",
     "playwright:init": "playwright install --with-deps",
     "playwright:open": "playwright codegen",
     "playwright:run": "playwright test",
