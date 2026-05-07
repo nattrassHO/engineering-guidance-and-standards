@@ -70,7 +70,7 @@ If you have already pushed a commit that is unsigned, you can rectify this in tw
     git push --force-with-lease
     ```
 
-3. Create a new branch from the main branch, re-apply your changes to that branch, submit a new PR, and close the old one. This is usually more work, but can be simpler to manage if there are multiple contributors, or a complex commit history.
+2. Create a new branch from the main branch, re-apply your changes to that branch, submit a new PR, and close the old one. This is usually more work, but can be simpler to manage if there are multiple contributors, or a complex commit history.
 
 ## Pull Requests
 
