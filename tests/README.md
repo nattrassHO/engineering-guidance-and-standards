@@ -1,10 +1,15 @@
-# Playwright End-to-End Testing
+# Contents
 
-## What is Playwright?
+- [Playwright End-to-End Testing](#playwright-end-to-end-testing)
+- [Unit Testing](#unit-testing)
+
+## Playwright End-to-End Testing
+
+### What is Playwright?
 
 [Playwright](https://playwright.dev/) is a modern end-to-end testing framework for web applications. It enables reliable browser automation for Chromium, Firefox, and WebKit, supporting powerful features like parallel execution, network mocking, accessibility checks, and more.
 
-## How to Install Playwright
+### How to Install Playwright
 
  To install it and its browsers, run:
 
@@ -13,7 +18,7 @@ npm ci
 npx playwright install --with-deps // This install the browser dependency 
 ```
 
-## How to Add New Tests
+### How to Add New Tests
 
 - Add new test files to `tests/e2e/`.
 - Use Playwright's [test API](https://playwright.dev/docs/test-api) and best practices for writing tests.
@@ -28,7 +33,7 @@ test('homepage loads', async ({ page }) => {
 });
 ```
 
-## How to Run Tests Locally
+### How to Run Tests Locally
 
 Start your local server 
 
@@ -46,7 +51,7 @@ npm run playwright:headed   # Run all tests with browser UI
 npm run playwright:debug    # Debug tests interactively
 ```
 
-## How to Use Playwright Codegen
+### How to Use Playwright Codegen
 
 Playwright's codegen tool helps you record user actions and generate test code automatically:
 
@@ -57,9 +62,9 @@ npm run playwright:open
 This opens the codegen UI. Interact with your site and copy the generated code into your test files.
 
 
-## Test Reports and Screenshots
+### Test Reports and Screenshots
 
-### Viewing Test Reports
+#### Viewing Test Reports
 
 After running tests, Playwright generates an HTML report in the `playwright-report/` folder. To view the report locally, run:
 
@@ -71,13 +76,13 @@ This will open a browser window with a detailed summary of all test runs, includ
 
 In CI (GitHub Actions), the HTML and JSON reports are uploaded as artifacts. 
 
-### Screenshots/Video on Failure
+#### Screenshots/Video on Failure
 
 Playwright is configured to automatically take screenshots of the browser when a test fails and also saves the video of failed test runs. 
 These screenshots are saved in the `playwright-report/` directory and are linked from the HTML report for easy debugging.
 
 
-## GitHub Actions CI & CTRF Reports
+### GitHub Actions CI & CTRF Reports
 
 This project uses GitHub Actions to automatically run Playwright tests on every pull request and push to `main`.
 
@@ -91,7 +96,7 @@ This project uses GitHub Actions to automatically run Playwright tests on every 
 This setup ensures you get instant feedback on test results for every PR, with both human-readable and machine-readable reports.
 
 
-### Test suite
+#### Test suite
 
 The test suite includes:
 
@@ -100,12 +105,12 @@ The test suite includes:
 - **links.spec.js** - Link validation tests
 - **exports.spec.js** - JSON schema validation tests
 
-## More Resources
+### More Resources
 - [Playwright Documentation](https://playwright.dev/docs/intro)
 - [Playwright Test API](https://playwright.dev/docs/test-api)
 - [Playwright CLI](https://playwright.dev/docs/test-cli)
 
-## How to migrate from Cypress to playwright 
+### How to migrate from Cypress to playwright 
 
 Here are the simple steps to migrate your tests:
 
@@ -128,3 +133,13 @@ Here are the simple steps to migrate your tests:
     - Replace Cypress steps with Playwright steps in your GitHub Actions workflows.
 6. **Run and verify:**
     - Run your Playwright tests locally and in CI to ensure everything works.
+
+## Unit Testing
+
+This repo uses Node.js built-in test runner for JavaScript helper unit tests.
+
+### How to Run Unit Tests
+
+```
+npm run test:unit
+```
