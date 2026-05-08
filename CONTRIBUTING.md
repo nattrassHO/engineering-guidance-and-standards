@@ -63,6 +63,13 @@ Please make sure you have set up Git to sign your commits with a method that Git
 If you have already pushed a commit that is unsigned, you can rectify this in two ways:
 
 1. Once commit signing is set up, rebase your work onto the main branch, then force push the changes. As with any force push, if you think others may have your branch checked out please make sure they are aware, e.g. with a comment on the pull request, so that they can update their local branches. This is usually not an issue for SEGAS contributions, as other collaborators work through the GitHub web interface rather than locally checked out versions.
+    ```shell
+    # start an interactive rebase that signs all commits, even ones that are unchanged by the rebase
+    git rebase --exec 'git commit --amend --no-edit --gpg-sign' -i origin/main
+    # force push the new branch if no-one else has pushed commits since you checked out
+    git push --force-with-lease
+    ```
+
 2. Create a new branch from the main branch, re-apply your changes to that branch, submit a new PR, and close the old one. This is usually more work, but can be simpler to manage if there are multiple contributors, or a complex commit history.
 
 ## Pull Requests
