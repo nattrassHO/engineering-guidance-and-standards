@@ -10,6 +10,7 @@ import {
   createReviewKey,
   isScannableContentFile,
   parsePageHeaderMetadata,
+  runCli,
   scanRepository,
   toPagePath
 } from "../../scripts/content-review-scan.mjs";
@@ -79,6 +80,8 @@ test("buildIssuePayload includes marker and review template sections", () => {
   assert.equal(issue.labels[0], "content");
   assert.match(issue.body, /\*\*Which content do you think should be reviewed\?\*\*/);
   assert.match(issue.body, /https:\/\/engineering\.homeoffice\.gov\.uk\/principles\/keep-it-simple\//);
+  assert.match(issue.body, /Automated review cycle alert\. Last reviewed\/updated on 2025-01-08 \(100 days ago\)\./);
+  assert.match(issue.body, /Source file: docs\/principles\/keep-it-simple\.md/);
   assert.match(issue.body, /<!-- review-key: docs\/principles\/keep-it-simple\.md -->/);
 });
 
@@ -126,4 +129,44 @@ Invalid`
   assert.equal(result.overdue[0].filePath, "docs/principles/old-page.md");
   assert.equal(result.skipped.length, 1);
   assert.equal(result.skipped[0].filePath, "docs/standards/invalid-date.md");
+});
+
+test("runCli dry run outputs generated issues", async () => {
+  const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "content-review-cli-"));
+  const originalCwd = process.cwd();
+
+  await fs.mkdir(path.join(tempRoot, "docs", "principles"), { recursive: true });
+  await fs.mkdir(path.join(tempRoot, "docs", "standards"), { recursive: true });
+  await fs.mkdir(path.join(tempRoot, "docs", "patterns"), { recursive: true });
+
+  await fs.writeFile(
+    path.join(tempRoot, "docs", "principles", "old-page.md"),
+    `---
+title: Old page
+date: 2025-01-01
+---
+Old`
+  );
+
+  const lines = [];
+
+  process.chdir(tempRoot);
+
+  try {
+    await runCli({
+      env: {
+        DRY_RUN: "true",
+        REVIEW_WINDOW_DAYS: "180",
+        NOW: "2026-05-09T00:00:00.000Z"
+      },
+      stdout: (line) => lines.push(line)
+    });
+  } finally {
+    process.chdir(originalCwd);
+  }
+
+  assert.match(lines.join("\n"), /Would create issue for docs\/principles\/old-page\.md/);
+  assert.match(lines.join("\n"), /Issue title: \[Content review\] Old page/);
+  assert.match(lines.join("\n"), /\*\*Which content do you think should be reviewed\?\*\*/);
+  assert.match(lines.join("\n"), /https:\/\/engineering\.homeoffice\.gov\.uk\/principles\/old-page\//);
 });

@@ -1,9 +1,23 @@
+// Scan standards, principles, and patterns content for overdue review dates.
+// The script reads page header metadata from markdown files, identifies pages
+// outside the review window, and can create deduplicated GitHub issues for them.
+import fsSync from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 
+const REVIEW_CONTENT_TEMPLATE_PATH = path.resolve(
+  import.meta.dirname,
+  "..",
+  ".github",
+  "ISSUE_TEMPLATE",
+  "review-content.md"
+);
+
 // Number of milliseconds in a 24-hour day.
 const MILLISECONDS_PER_DAY = 24 * 60 * 60 * 1000;
+
+const reviewContentTemplate = loadReviewContentTemplate();
 
 // ---------- Pure helpers ----------
 
@@ -11,18 +25,34 @@ function toPosixPath(filePath) {
   return filePath.split(path.sep).join("/");
 }
 
-export function parsePageHeaderMetadata(content) {
-  // Parse only the top YAML-style metadata block delimited by --- lines.
+function loadReviewContentTemplate() {
+  const templateFile = fsSync.readFileSync(REVIEW_CONTENT_TEMPLATE_PATH, "utf8");
+  return stripFrontMatter(templateFile).trim();
+}
+
+function stripFrontMatter(content) {
   if (!content.startsWith("---\n")) {
-    return {};
+    return content;
   }
 
   const endOffset = content.indexOf("\n---", 4);
   if (endOffset < 0) {
+    return content;
+  }
+
+  return content.slice(endOffset + "\n---".length).trimStart();
+}
+
+export function parsePageHeaderMetadata(content) {
+  // Parse only the top YAML-style metadata block delimited by --- lines.
+  const pageBody = stripFrontMatter(content);
+  if (pageBody === content) {
     return {};
   }
 
-  const pageHeaderMetadataText = content.slice(4, endOffset).trim();
+  const pageHeaderMetadataText = content
+    .slice(4, content.length - pageBody.length - "\n---".length)
+    .trim();
   const metadata = {};
 
   for (const rawLine of pageHeaderMetadataText.split("\n")) {
@@ -92,6 +122,23 @@ function buildPageUrl(siteRoot, pagePath) {
   return `${rootWithoutTrailingSlash}${pagePath}`;
 }
 
+function populateReviewContentTemplate({
+  pageUrl,
+  dateIso,
+  ageDays,
+  repoRelativePath,
+  reviewKey
+}) {
+  return reviewContentTemplate
+    .replace("<!-- CONTENT_REVIEW_PAGE_URL -->", pageUrl)
+    .replace(
+      "<!-- CONTENT_REVIEW_REASON -->",
+      `Automated review cycle alert. Last reviewed/updated on ${dateIso} (${ageDays} days ago).`
+    )
+    .replace("<!-- CONTENT_REVIEW_SOURCE_FILE -->", `Source file: ${toPosixPath(repoRelativePath)}`)
+    .replace("<!-- CONTENT_REVIEW_KEY -->", `<!-- ${reviewKey} -->`);
+}
+
 export function buildIssuePayload({
   repoRelativePath,
   title,
@@ -106,33 +153,16 @@ export function buildIssuePayload({
   const safeTitle = title || path.basename(repoRelativePath, ".md");
 
   return {
-    // Keep issue body aligned with the existing review issue template for triage consistency.
+    // Build from the shared issue template so manual and automated review issues stay aligned.
     title: `[Content review] ${safeTitle}`,
     labels,
-    body: [
-      "We welcome feedback on all of the content on the site. Please let us know what you think we could change or improve below.",
-      "",
-      "**Which content do you think should be reviewed?**",
-      "Please provide urls so we can quickly identify the page in question",
+    body: populateReviewContentTemplate({
       pageUrl,
-      "",
-      "**Why do you think we should review this?**",
-      "Please provide a brief description of your rationale for a review",
-      `Automated review cycle alert. Last reviewed/updated on ${dateIso} (${ageDays} days ago).`,
-      "",
-      "**Do you have a suggestion for how this could be improved?**",
-      "If you want to suggest an improvement then please outline it here",
-      "",
-      "**Additional information**",
-      "Add any other information you think would be useful here",
-      `Source file: ${toPosixPath(repoRelativePath)}`,
-      "",
-      "**Please confirm the below**",
-      "",
-      "- [ ] I have checked through the issues on the repository and don't think this has already been suggested",
-      "",
-      `<!-- ${reviewKey} -->`
-    ].join("\n"),
+      dateIso,
+      ageDays,
+      repoRelativePath,
+      reviewKey
+    }),
     reviewKey,
     pageUrl
   };
@@ -344,6 +374,8 @@ export async function runCli({ env = process.env, stdout = console.log } = {}) {
     stdout("DRY_RUN is enabled. No issues will be created.");
     for (const content of actionable) {
       stdout(`Would create issue for ${content.filePath} (${content.issue.pageUrl})`);
+      stdout(`Issue title: ${content.issue.title}`);
+      stdout(content.issue.body);
     }
     return;
   }
