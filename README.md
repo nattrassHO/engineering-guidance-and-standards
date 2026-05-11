@@ -78,6 +78,11 @@ This repository includes a scheduled workflow to detect stale content and raise 
 - `review_window_days`: minimum age before content is considered overdue (default `180`)
 - `max_issues_per_run`: safety cap on issue creation per run (default `10`, set `0` for no cap)
 
+### Automated run defaults
+
+- Scheduled runs default to `dry_run=true`.
+- To explicitly enable issue creation for automated runs, set repository variable `CONTENT_REVIEW_DRY_RUN` to `false`.
+
 ### Local testing
 
 You can run the scanner locally before using the workflow:
