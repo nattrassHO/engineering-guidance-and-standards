@@ -1,0 +1,19 @@
+---
+permalink: /api/patterns/
+eleventyExcludeFromCollections: true
+---
+{
+  "patterns": [
+    {% for item in collections.getAllPatternsOrderedByTitle %}
+    {
+      "id": {{ item.fileSlug | dump }},
+      "title": {{ item.data.title | dump }},
+      "url": {{ item.url | prefixWithRoot(siteRoot) | dump }},
+      "date": {{ item.data.date | dump }},
+      "tags": {{ item.data.tags | dump }},
+      "requirements": []
+    }{% if not loop.last %},
+    {% endif %}
+    {% endfor %}
+  ]
+}

@@ -1,0 +1,19 @@
+---
+permalink: /api/principles/
+eleventyExcludeFromCollections: true
+---
+{
+  "principles": [
+    {% for item in collections.getAllPrinciplesOrderedByTitle %}
+    {
+      "id": {{ item.fileSlug | dump }},
+      "title": {{ item.data.title | dump }},
+      "url": {{ item.url | prefixWithRoot(siteRoot) | dump }},
+      "date": {{ item.data.date | dump }},
+      "tags": {{ item.data.tags | dump }},
+      "requirements": []
+    }{% if not loop.last %},
+    {% endif %}
+    {% endfor %}
+  ]
+}

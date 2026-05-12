@@ -1,0 +1,19 @@
+---
+permalink: /api/standards/
+eleventyExcludeFromCollections: true
+---
+{
+  "standards": [
+    {% for standard in collections.getAllStandardsOrderedByID %}
+    {
+      "id": {{ standard.data.id | dump }},
+      "title": {{ standard.data.title | dump }},
+      "url": {{ standard.url | prefixWithRoot(siteRoot) | dump }},
+      "date": {{ standard.data.date | isoDateOnly | dump }},
+      "tags": {{ standard.data.tags | dump }},
+      "requirements": {{ standard.templateContent | extractRequirements | dump }}
+    }{% if not loop.last %},
+    {% endif %}
+    {% endfor %}
+  ]
+}

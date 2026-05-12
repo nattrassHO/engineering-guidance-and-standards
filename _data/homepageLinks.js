@@ -21,5 +21,12 @@ export default async () => {
             await fromPage('principles'),
             await fromPage('standards'),
             await fromPage('patterns'),
+            {
+                url: '/api/',
+                id: 'api',
+                data: {
+                    title: 'API Reference',
+                },
+            },
     ];
 }

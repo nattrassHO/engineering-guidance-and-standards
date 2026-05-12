@@ -1,0 +1,241 @@
+openapi: 3.0.3
+info:
+  title: Engineering Guidance and Standards API
+  description: |
+    OpenAPI specification for the Engineering Guidance and Standards API. This API provides access to standards, principles, and patterns.
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080/api
+    description: Local development server
+  - url: https://engineering.homeoffice.gov.uk/api
+    description: Production server
+paths:
+  /standards.json:
+    get:
+      tags:
+        - Standards
+      operationId: getStandards
+      summary: Get all standards
+      responses:
+        '200':
+          description: A list of standards
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StandardList'
+  /standards/{standardId}.json:
+    get:
+      tags:
+        - Standards
+      operationId: getStandard
+      summary: Get a standard by ID
+      parameters:
+        - name: standardId
+          in: path
+          required: true
+          description: The SEGAS identifier for the standard
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A single standard
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  standard:
+                    $ref: '#/components/schemas/Standard'
+  /principles.json:
+    get:
+      tags:
+        - Principles
+      operationId: getPrinciples
+      summary: Get all principles
+      responses:
+        '200':
+          description: A list of principles
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrincipleList'
+  /principles/{principleId}.json:
+    get:
+      tags:
+        - Principles
+      operationId: getPrinciple
+      summary: Get a principle by ID
+      parameters:
+        - name: principleId
+          in: path
+          required: true
+          description: The slug for the principle
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A single principle
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  principle:
+                    $ref: '#/components/schemas/Principle'
+  /patterns.json:
+    get:
+      tags:
+        - Patterns
+      operationId: getPatterns
+      summary: Get all patterns
+      responses:
+        '200':
+          description: A list of patterns
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatternList'
+  /patterns/{patternId}.json:
+    get:
+      tags:
+        - Patterns
+      operationId: getPattern
+      summary: Get a pattern by ID
+      parameters:
+        - name: patternId
+          in: path
+          required: true
+          description: The slug for the pattern
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A single pattern
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  pattern:
+                    $ref: '#/components/schemas/Pattern'
+components:
+  schemas:
+    StandardList:
+      type: object
+      properties:
+        standards:
+          type: array
+          items:
+            $ref: '#/components/schemas/Standard'
+    PrincipleList:
+      type: object
+      properties:
+        principles:
+          type: array
+          items:
+            $ref: '#/components/schemas/Principle'
+    PatternList:
+      type: object
+      properties:
+        patterns:
+          type: array
+          items:
+            $ref: '#/components/schemas/Pattern'
+    Standard:
+      type: object
+      required:
+        - id
+        - title
+        - url
+        - date
+        - tags
+        - requirements
+      properties:
+        id:
+          type: string
+          description: A unique ID for the specification (e.g., SEGAS-00001)
+          pattern: ^SEGAS-\d{5}$
+        title:
+          type: string
+          description: A short title describing the subject of the specification
+        url:
+          type: string
+          description: The url for the standard's documentation
+        date:
+          type: string
+          description: The date this standard was last updated or reviewed (ISO8601)
+          pattern: ^\d{4}-\d{2}-\d{2}$
+        tags:
+          type: array
+          description: The tags assigned to this standard
+          items:
+            type: string
+        requirements:
+          type: array
+          description: A list of requirements to meet this standard
+          items:
+            $ref: '#/components/schemas/Requirement'
+    Requirement:
+      type: object
+      required:
+        - title
+        - id
+      properties:
+        title:
+          type: string
+          description: A short description of the requirement
+        id:
+          type: string
+          description: The html id of this requirement within the standard's documentation page.
+    Principle:
+      type: object
+      required:
+        - id
+        - title
+        - url
+        - date
+        - tags
+        - requirements
+      properties:
+        id:
+          type: string
+        url:
+          type: string
+        title:
+          type: string
+        date:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        requirements:
+          type: array
+          items:
+            $ref: '#/components/schemas/Requirement'
+    Pattern:
+      type: object
+      required:
+        - id
+        - title
+        - url
+        - date
+        - tags
+        - requirements
+      properties:
+        id:
+          type: string
+        url:
+          type: string
+        title:
+          type: string
+        date:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        requirements:
+          type: array
+          items:
+            type: object

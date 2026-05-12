@@ -35,6 +35,9 @@ export default async function(eleventyConfig) {
     // Pass assets through to final build directory
     eleventyConfig.addPassthroughCopy({ "docs/assets/logos": "assets/logos"});
     eleventyConfig.addPassthroughCopy({ "docs/assets/images": "assets/images"});
+    // Pass through OpenAPI spec for Swagger UI
+    eleventyConfig.addPassthroughCopy('docs/openapi.yaml');
+
     // Register the plugins
     let govukPluginOptions = {
         icons: {
@@ -84,6 +87,10 @@ export default async function(eleventyConfig) {
                     {
                         href: '/accessibility-statement/',
                         text: 'Accessibility'
+                    },
+                    {
+                        href: '/api/',
+                        text: 'API reference'
                     },
                     {
                         href: gitHubRepositoryUrl,
