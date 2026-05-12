@@ -5,8 +5,8 @@ info:
     OpenAPI specification for the Engineering Guidance and Standards API. This API provides access to standards, principles, and patterns.
   version: 1.0.0
 servers:
-  - url: http://localhost:8080/api
-    description: Local development server
+  - url: /api
+    description: Same-origin server
   - url: https://engineering.homeoffice.gov.uk/api
     description: Production server
 paths:
