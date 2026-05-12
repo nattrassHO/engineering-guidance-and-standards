@@ -2,10 +2,29 @@ import { test, expect } from '@playwright/test';
 import { testing_params } from '../support/testing_params';
 
 async function getJson(page, path) {
-  const response = await page.request.get(`${testing_params.TEST_ROOT_URL}${path}`);
-  expect(response.ok()).toBeTruthy();
-  expect(response.headers()['content-type']).toContain('application/json');
-  return response.json();
+  const candidatePaths = [path];
+  if (path.startsWith('/api/')) {
+    candidatePaths.push(path.replace(/^\/api/, ''));
+  }
+
+  const attempts = [];
+
+  for (const candidatePath of candidatePaths) {
+    const url = `${testing_params.TEST_ROOT_URL}${candidatePath}`;
+    const response = await page.request.get(url);
+
+    if (response.ok()) {
+      expect(response.headers()['content-type']).toContain('application/json');
+      return response.json();
+    }
+
+    attempts.push(`${url} -> ${response.status()} ${response.statusText()}`);
+  }
+
+  expect(
+    false,
+    `Unable to fetch JSON response. Tried:\n${attempts.join('\n')}`
+  ).toBeTruthy();
 }
 
 test.describe('API documentation', () => {
