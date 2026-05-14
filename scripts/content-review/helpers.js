@@ -1,3 +1,6 @@
+import matter from "gray-matter";
+import path from "node:path";
+
 export function parseBoolean(value, fallback = false) {
   if (value === undefined) return fallback;
   return /^true$/i.test(String(value).trim());
@@ -9,45 +12,19 @@ export function parseLabels(value) {
     .map((label) => label.trim())
     .filter(Boolean);
 }
-import fsSync from "node:fs";
-import path from "node:path";
 
 export function toPosixPath(filePath) {
   return filePath.split(path.sep).join("/");
 }
 
 export function stripFrontMatter(content) {
-  if (!content.startsWith("---\n")) {
-    return content;
-  }
-  const endOffset = content.indexOf("\n---", 4);
-  if (endOffset < 0) {
-    return content;
-  }
-  return content.slice(endOffset + "\n---".length).trimStart();
+  return matter(content).content.trimStart();
 }
 
 export function parsePageHeaderMetadata(content) {
-  const pageBody = stripFrontMatter(content);
-  if (pageBody === content) {
-    return {};
-  }
-  const pageHeaderMetadataText = content
-    .slice(4, content.length - pageBody.length - "\n---".length)
-    .trim();
-  const metadata = {};
-  for (const rawLine of pageHeaderMetadataText.split("\n")) {
-    const line = rawLine.trim();
-    if (!line || line.startsWith("#")) continue;
-    const separator = line.indexOf(":");
-    if (separator < 0) continue;
-    const key = line.slice(0, separator).trim();
-    const value = line
-      .slice(separator + 1)
-      .replace(/\s+#.*$/, "")
-      .trim()
-      .replace(/^['"]|['"]$/g, "");
-    if (key) metadata[key] = value;
+  const metadata = { ...matter(content).data };
+  if (metadata.date instanceof Date && !Number.isNaN(metadata.date.getTime())) {
+    metadata.date = metadata.date.toISOString().slice(0, 10);
   }
   return metadata;
 }
