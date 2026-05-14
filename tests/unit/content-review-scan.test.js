@@ -4,16 +4,10 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 
-import {
-  buildIssuePayload,
-  calculateAgeDays,
-  createReviewKey,
-  isScannableContentFile,
-  parsePageHeaderMetadata,
-  runCli,
-  scanRepository,
-  toPagePath
-} from "../../scripts/content-review-scan.mjs";
+import { calculateAgeDays, isScannableContentFile, parsePageHeaderMetadata, toPagePath, createReviewKey } from "../../scripts/content-review/helpers.js";
+import { scanRepository } from "../../scripts/content-review/scan.js";
+import { buildIssuePayloadFactory } from "../../scripts/content-review/template.js";
+import { runCli } from "../../scripts/content-review-scan.mjs";
 
 test("parsePageHeaderMetadata extracts simple key values", () => {
   const content = `---
@@ -67,6 +61,9 @@ test("createReviewKey is deterministic per file", () => {
 });
 
 test("buildIssuePayload includes marker and review template sections", () => {
+
+  const reviewContentTemplate = "**Which content do you think should be reviewed?**\n<!-- CONTENT_REVIEW_PAGE_URL -->\n<!-- CONTENT_REVIEW_REASON -->\n<!-- CONTENT_REVIEW_SOURCE_FILE -->\n<!-- CONTENT_REVIEW_KEY -->";
+  const buildIssuePayload = buildIssuePayloadFactory(reviewContentTemplate);
   const issue = buildIssuePayload({
     repoRelativePath: "docs/principles/keep-it-simple.md",
     title: "Keep it simple",
@@ -119,10 +116,14 @@ date: 1 Jan 2025
 Invalid`
   );
 
+
+  const reviewContentTemplate = "**Which content do you think should be reviewed?**\n<!-- CONTENT_REVIEW_PAGE_URL -->\n<!-- CONTENT_REVIEW_REASON -->\n<!-- CONTENT_REVIEW_SOURCE_FILE -->\n<!-- CONTENT_REVIEW_KEY -->";
+  const buildIssuePayload = buildIssuePayloadFactory(reviewContentTemplate);
   const result = await scanRepository({
     repoRoot: tempRoot,
     reviewWindowDays: 180,
-    now: new Date("2026-05-09T00:00:00.000Z")
+    now: new Date("2026-05-09T00:00:00.000Z"),
+    buildIssuePayload
   });
 
   assert.equal(result.overdue.length, 1);

@@ -44,6 +44,7 @@
     "@x-govuk/govuk-eleventy-plugin": "9.0.1",
     "gray-matter": "4.0.3",
     "luxon": "3.7.2",
+    "node-fetch": "^3.3.2",
     "parse5": "8.0.1"
   },
   "devDependencies": {
