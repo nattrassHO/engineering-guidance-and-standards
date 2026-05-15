@@ -60,6 +60,7 @@ function handleDryRun(scanResult, stdout) {
   for (const content of scanResult.overdue) {
     stdout(`Would create issue for ${content.filePath} (${content.issue.pageUrl})`);
     stdout(`Issue title: ${content.issue.title}`);
+    stdout(`Labels: ${Array.isArray(content.issue.labels) ? content.issue.labels.join(", ") : "(none)"}`);
     stdout(content.issue.body);
   }
 }

@@ -1,5 +1,6 @@
 import matter from "gray-matter";
 import path from "node:path";
+import { mapTagsToGuildLabels } from "./tagGuildLabelMapper.js";
 
 export function parseBoolean(value, fallback = false) {
   if (value === undefined) return fallback;
@@ -56,3 +57,6 @@ export function calculateAgeDays(dateIsoString, now = new Date()) {
 export function createReviewKey(repoRelativePath) {
   return `review-key: ${toPosixPath(repoRelativePath)}`;
 }
+
+// Helper to map tags to guild labels (re-export for convenience)
+export { mapTagsToGuildLabels };

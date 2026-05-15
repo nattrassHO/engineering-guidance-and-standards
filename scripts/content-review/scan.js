@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { toPosixPath, isScannableContentFile, parsePageHeaderMetadata, calculateAgeDays, toPagePath, createReviewKey } from "./helpers.js";
+import { toPosixPath, isScannableContentFile, parsePageHeaderMetadata, calculateAgeDays, toPagePath, createReviewKey, mapTagsToGuildLabels } from "./helpers.js";
 
 export async function findMarkdownFiles(dirPath) {
   const entries = await fs.readdir(dirPath, { withFileTypes: true });
@@ -47,6 +47,13 @@ export async function scanRepository({
     }
     const ageDays = calculateAgeDays(pageHeaderMetadata.date, now);
     if (ageDays === null || ageDays < reviewWindowDays) continue;
+    // Capture tags and map to guild labels
+    const tags = Array.isArray(pageHeaderMetadata.tags)
+      ? pageHeaderMetadata.tags
+      : typeof pageHeaderMetadata.tags === "string"
+        ? pageHeaderMetadata.tags.split(",").map(t => t.trim()).filter(Boolean)
+        : [];
+    const guildLabels = mapTagsToGuildLabels(tags);
     overdue.push({
       filePath: repoRelativePath,
       dateIso: pageHeaderMetadata.date,
@@ -57,7 +64,7 @@ export async function scanRepository({
         dateIso: pageHeaderMetadata.date,
         ageDays,
         siteRoot,
-        labels: []
+        labels: guildLabels
       })
     });
   }
