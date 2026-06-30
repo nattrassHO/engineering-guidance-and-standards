@@ -6,7 +6,7 @@ order: 1
 title: Write maintainable, reusable and evolutionary code
 date: 2023-07-25
 status: deprecated
-deprecatedOn: 2026-06-30
+deprecatedOn: "2026-06-30"
 deprecationReason: Superseded by more comprehensive guidance.
 replacedBy: /principles/continuously-maintain-and-evolve/
 tags:
